@@ -18,10 +18,9 @@ pluginManagement {
 }
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+    id("com.android.application") version "9.0.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 
 include(":app")

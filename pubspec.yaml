@@ -25,7 +25,9 @@ flutter:
     - assets/images/instructor/
     - assets/images/RCDA_logo.jpg
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/RCDA_applogo.jpg"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/RCDA_applogo.jpg"

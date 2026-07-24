@@ -54,14 +54,15 @@ class _AppScaffoldState extends State<AppScaffold> {
       return false;
     }
 
-    // React to genuine direction changes (UserScrollNotification) rather
-    // than every tiny pixel delta — raw deltas flicker during momentum
-    // scrolling because direction briefly reverses between frames.
-    if (notification is UserScrollNotification) {
-      if (notification.direction == ScrollDirection.reverse && _headerVisible) {
+    // React to raw scroll deltas rather than UserScrollNotification's
+    // direction classification — direction can lag or behave
+    // inconsistently between mouse-wheel (web) and touch-drag (mobile),
+    // whereas scrollDelta is reported consistently across input types.
+    if (notification is ScrollUpdateNotification) {
+      final delta = notification.scrollDelta ?? 0;
+      if (delta > 0 && _headerVisible) {
         setState(() => _headerVisible = false); // scrolling down
-      } else if (notification.direction == ScrollDirection.forward &&
-          !_headerVisible) {
+      } else if (delta < 0 && !_headerVisible) {
         setState(() => _headerVisible = true); // scrolling up
       }
     }

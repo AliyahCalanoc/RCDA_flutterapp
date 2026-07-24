@@ -51,7 +51,7 @@ class _AssessScreenState extends State<AssessScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Assess Students',
-      currentIndex: 3,
+      currentIndex: 2,
       onTabSelected: widget.onTabSelected,
       body: ListView(
         padding: const EdgeInsets.all(16),

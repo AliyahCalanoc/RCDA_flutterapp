@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/common_widgets.dart';
 
 class StudentsScreen extends StatefulWidget {
   final void Function(int) onTabSelected;
@@ -23,10 +24,12 @@ class _StudentsScreenState extends State<StudentsScreen> {
 
     return AppScaffold(
       title: 'My Students',
-      currentIndex: 1,
+      currentIndex: -1,
+      showNavBar: false,
+      leading: const ModernBackButton(),
       onTabSelected: widget.onTabSelected,
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         child: Column(
           children: [
             Row(
@@ -75,16 +78,10 @@ class _StudentsScreenState extends State<StudentsScreen> {
                             padding: const EdgeInsets.all(14),
                             child: Row(
                               children: [
-                                CircleAvatar(
-                                  backgroundColor: AppColors.primaryRed
-                                      .withValues(alpha: 0.16),
-                                  child: Text(
-                                    s.name.isNotEmpty ? s.name[0] : '?',
-                                    style: const TextStyle(
-                                        color: AppColors.primaryRed,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
+                                ProfileAvatar(
+                                    name: s.name,
+                                    imageAsset: s.avatarAsset,
+                                    radius: 24),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -126,7 +123,10 @@ class _StudentsScreenState extends State<StudentsScreen> {
                                   ),
                                 ),
                                 OutlinedButton(
-                                  onPressed: () => widget.onTabSelected(3),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    widget.onTabSelected(2); // Assess tab
+                                  },
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: AppColors.primaryRed,
                                     side: const BorderSide(

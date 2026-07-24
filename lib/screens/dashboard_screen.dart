@@ -3,6 +3,7 @@ import '../data/mock_data.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/common_widgets.dart';
+import 'students_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final void Function(int) onTabSelected;
@@ -12,22 +13,13 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'My Dashboard',
+      title: "Here's what's on your plate today",
+      subtitle: 'Welcome back, ${MockData.instructorName.split(' ').first}',
       currentIndex: 0,
       onTabSelected: onTabSelected,
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         children: [
-          Text(
-            'Welcome back, ${MockData.instructorName.split(' ').first}',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Here\'s what\'s on your plate today',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -62,7 +54,11 @@ class DashboardScreen extends StatelessWidget {
           SectionHeader(
             title: 'My Assigned Students',
             trailing: TextButton(
-              onPressed: () => onTabSelected(1),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => StudentsScreen(onTabSelected: onTabSelected),
+                ),
+              ),
               child: const Text('View All'),
             ),
           ),
@@ -76,11 +72,13 @@ class DashboardScreen extends StatelessWidget {
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 4),
+                      leading: ProfileAvatar(
+                          name: s.name, imageAsset: s.avatarAsset, radius: 20),
                       title: Text(s.name,
                           style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text('${s.course} · Last: ${s.lastSession}'),
                       trailing: OutlinedButton(
-                        onPressed: () => onTabSelected(3),
+                        onPressed: () => onTabSelected(2),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primaryRed,
                           side: const BorderSide(color: AppColors.primaryRed),
@@ -107,9 +105,10 @@ class DashboardScreen extends StatelessWidget {
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 4),
-                      leading: const CircleAvatar(
-                        backgroundColor: Color(0x22B3261E),
-                        child: Icon(Icons.event_rounded,
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            AppColors.primaryRed.withValues(alpha: 0.14),
+                        child: const Icon(Icons.event_rounded,
                             color: AppColors.primaryRed, size: 20),
                       ),
                       title: Text(s.course,

@@ -9,9 +9,8 @@ class ThemeController {
 }
 
 /// RC Driving Academy brand palette.
-/// Brand/status colors stay constant across modes; surfaces and text
-/// colors flip between a dark theme and a warm light theme (closer to
-/// the Recipe Finder reference, which uses a soft cream light mode).
+/// Brand/status colors stay constant across modes. Light mode uses a
+/// neutral white/gray scale (no warm cream tint) for a clean, modern look.
 class AppColors {
   // Brand — unchanged in both modes
   static const Color primaryRed = Color(0xFFB3261E);
@@ -26,20 +25,20 @@ class AppColors {
   static bool get _dark => ThemeController.isDark.value;
 
   static Color get background =>
-      _dark ? const Color(0xFF121212) : const Color(0xFFFAF6EF);
+      _dark ? const Color(0xFF121212) : const Color(0xFFF7F7F9);
   static Color get surface =>
       _dark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF);
   static Color get surfaceElevated =>
-      _dark ? const Color(0xFF262626) : const Color(0xFFF3EEE4);
+      _dark ? const Color(0xFF262626) : const Color(0xFFF1F2F4);
   static Color get border =>
-      _dark ? const Color(0xFF2E2E2E) : const Color(0xFFE8E1D3);
+      _dark ? const Color(0xFF2E2E2E) : const Color(0xFFE7E8EC);
 
   static Color get textPrimary =>
-      _dark ? const Color(0xFFF5F5F5) : const Color(0xFF231F1C);
+      _dark ? const Color(0xFFF5F5F5) : const Color(0xFF17181C);
   static Color get textSecondary =>
-      _dark ? const Color(0xFFA3A3A3) : const Color(0xFF756E63);
+      _dark ? const Color(0xFFA3A3A3) : const Color(0xFF676B76);
   static Color get textMuted =>
-      _dark ? const Color(0xFF6B6B6B) : const Color(0xFFA39A8B);
+      _dark ? const Color(0xFF6B6B6B) : const Color(0xFFA0A4AC);
 }
 
 class AppTheme {
@@ -62,6 +61,7 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
+        surfaceTintColor: Colors.transparent,
         titleTextStyle: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w800,
@@ -74,7 +74,9 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
-        elevation: 0,
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
+        surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
@@ -102,6 +104,29 @@ class AppTheme {
           borderSide: BorderSide.none,
         ),
         hintStyle: TextStyle(color: AppColors.textMuted),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 64,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: AppColors.primaryRed.withValues(alpha: 0.14),
+        indicatorShape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? AppColors.primaryRed : AppColors.textSecondary,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            size: 24,
+            color: selected ? AppColors.primaryRed : AppColors.textSecondary,
+          );
+        }),
       ),
     );
   }

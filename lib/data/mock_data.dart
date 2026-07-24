@@ -3,39 +3,48 @@ import '../models/models.dart';
 /// Static mock data — mirrors the RC Driving Academy web instructor
 /// dashboard (Mario Santos, 7 assigned students, PDC/TDC sessions).
 class MockData {
-  static const instructorName = 'Mario Santos';
+  static const instructorName = 'Joel Barish';
   static const instructorRole = 'Instructor · RCDA';
-  static const initials = 'MS';
+  static const initials = 'JB';
+
+  // Local asset photo — put the real file at this exact path in your project.
+  static const instructorAvatarAsset =
+      'assets/images/instructor/Joel_Barish.jpg';
 
   static const sessionsToday = 0;
   static const upcomingSessions = 3;
 
   static const List<StudentModel> students = [
     StudentModel(
-        name: 'John Cruz',
+        name: 'Clementine Kruczynski',
         course: 'TDC Face to Face',
         classification: '—',
-        lastSession: 'Aug 3, 2026'),
+        lastSession: 'Aug 3, 2026',
+        avatarAsset: 'assets/images/students/Clementine_Kruczynski.jpg'),
     StudentModel(
-        name: 'Anna Lim',
+        name: 'Niel Perry',
         course: 'TDC Face to Face',
         classification: '—',
-        lastSession: 'Jul 27, 2026'),
+        lastSession: 'Jul 27, 2026',
+        avatarAsset: 'assets/images/students/Niel_Perry.jpg'),
     StudentModel(
-        name: 'Bojack Horseman',
+        name: 'Todd_Anderson',
         course: 'PDC 4 Wheels',
         classification: 'average',
-        lastSession: 'Jul 20, 2026'),
+        lastSession: 'Jul 20, 2026',
+        avatarAsset: 'assets/images/students/Todd_Anderson.jpg'),
     StudentModel(
-        name: 'Peanut Butter',
+        name: 'Steven Meeks',
         course: 'PDC 4 Wheels',
         classification: '—',
-        lastSession: 'Jul 20, 2026'),
+        lastSession: 'Jul 20, 2026',
+        avatarAsset: 'assets/images/students/Steven_Meeks.jpg'),
     StudentModel(
-        name: 'Pork Andbeans',
+        name: 'Charlie Dalton',
         course: 'Assigned',
         classification: '—',
-        lastSession: '—'),
+        lastSession: '—',
+        avatarAsset: 'assets/images/students/Charlie_Dalton.jpg'),
   ];
 
   static const List<ScheduleItem> schedule = [

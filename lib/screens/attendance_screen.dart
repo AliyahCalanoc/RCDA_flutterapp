@@ -23,7 +23,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Attendance',
-      currentIndex: 4,
+      currentIndex: 3,
       onTabSelected: widget.onTabSelected,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

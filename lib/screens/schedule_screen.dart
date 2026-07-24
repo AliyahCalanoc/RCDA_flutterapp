@@ -13,7 +13,7 @@ class ScheduleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'My Schedule',
-      currentIndex: 2,
+      currentIndex: 1,
       onTabSelected: onTabSelected,
       body: ListView(
         padding: const EdgeInsets.all(16),

@@ -1,154 +1,125 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../data/mock_data.dart';
+import '../theme/app_theme.dart';
+import 'common_widgets.dart';
 
-/// Shared shell: RCDA app bar (with a light/dark toggle, no drawer/
-/// hamburger) and a floating pill-style bottom nav bar — closer to the
-/// Recipe Finder reference — with the 5 instructor tabs.
+/// Shared shell for the app: a flat modern header (no solid navbar block)
+/// and a floating rounded bottom nav with the 5 top-level instructor
+/// sections. Pushed (non-tab) screens can set [showNavBar] to false and
+/// pass a [leading] back button instead.
 class AppScaffold extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Widget body;
   final int currentIndex;
   final void Function(int) onTabSelected;
   final List<Widget>? actions;
+  final Widget? leading;
+  final bool showNavBar;
+
+  /// 0.0–1.0 opacity applied to the header. Screens that want the header
+  /// to fade as the user scrolls (e.g. Dashboard) pass a value derived
+  /// from their ScrollController; everything else defaults to fully
+  /// opaque and is unaffected.
+  final double headerOpacity;
 
   const AppScaffold({
     super.key,
     required this.title,
+    this.subtitle,
     required this.body,
     required this.currentIndex,
     required this.onTabSelected,
     this.actions,
+    this.leading,
+    this.showNavBar = true,
+    this.headerOpacity = 1.0,
   });
-
-  static const _tabs = [
-    (icon: Icons.grid_view_rounded, label: 'Dashboard'),
-    (icon: Icons.people_alt_rounded, label: 'Students'),
-    (icon: Icons.calendar_month_rounded, label: 'Schedule'),
-    (icon: Icons.star_rounded, label: 'Assess'),
-    (icon: Icons.checklist_rounded, label: 'Attendance'),
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ThemeController.isDark.value;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        automaticallyImplyLeading: false,
-        actions: [
-          ...?actions,
-          IconButton(
-            tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
-            icon: Icon(
-                isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-            onPressed: ThemeController.toggle,
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16, left: 4),
-            child: CircleAvatar(
-              backgroundColor: Colors.white24,
-              child: Text(
-                MockData.initials,
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            AnimatedOpacity(
+              opacity: headerOpacity,
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOut,
+              child: ModernHeader(
+                title: title,
+                subtitle: subtitle,
+                leading: leading,
+                trailing: actions != null
+                    ? Row(mainAxisSize: MainAxisSize.min, children: actions!)
+                    : ProfileAvatar(
+                        name: MockData.instructorName,
+                        imageAsset: MockData.instructorAvatarAsset,
+                        radius: 19,
+                        ring: true,
+                      ),
               ),
             ),
-          ),
-        ],
+            Expanded(child: body),
+          ],
+        ),
       ),
-      body: SafeArea(child: body),
-      bottomNavigationBar: _FloatingPillNav(
-        currentIndex: currentIndex,
-        onTabSelected: onTabSelected,
-        tabs: _tabs,
-      ),
+      bottomNavigationBar: showNavBar
+          ? _FloatingNavBar(
+              currentIndex: currentIndex,
+              onTabSelected: onTabSelected,
+            )
+          : null,
     );
   }
 }
 
-class _FloatingPillNav extends StatelessWidget {
+class _FloatingNavBar extends StatelessWidget {
   final int currentIndex;
   final void Function(int) onTabSelected;
-  final List<({IconData icon, String label})> tabs;
 
-  const _FloatingPillNav({
-    required this.currentIndex,
-    required this.onTabSelected,
-    required this.tabs,
-  });
+  const _FloatingNavBar(
+      {required this.currentIndex, required this.onTabSelected});
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        child: Container(
-          height: 68,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.10),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: NavigationBar(
+            height: 64,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedIndex: currentIndex,
+            onDestinationSelected: onTabSelected,
+            destinations: const [
+              NavigationDestination(
+                  icon: Icon(Icons.grid_view_rounded), label: 'Dashboard'),
+              NavigationDestination(
+                  icon: Icon(Icons.calendar_month_rounded), label: 'Schedule'),
+              NavigationDestination(
+                  icon: Icon(Icons.star_rounded), label: 'Assess'),
+              NavigationDestination(
+                  icon: Icon(Icons.checklist_rounded), label: 'Attendance'),
+              NavigationDestination(
+                  icon: Icon(Icons.person_rounded), label: 'Account'),
             ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(tabs.length, (i) {
-              final selected = i == currentIndex;
-              final tab = tabs[i];
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTabSelected(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.primaryRed.withValues(alpha: 0.16)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          tab.icon,
-                          size: 22,
-                          color: selected
-                              ? AppColors.primaryRed
-                              : AppColors.textSecondary,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          tab.label,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight:
-                                selected ? FontWeight.w700 : FontWeight.w500,
-                            color: selected
-                                ? AppColors.primaryRed
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }),
           ),
         ),
       ),

@@ -6,12 +6,15 @@ class StudentModel {
   final String course;
   final String classification; // '', 'average', 'fast', 'needs improvement'
   final String lastSession;
+  final String?
+      avatarAsset; // local asset image path — null falls back to initials
 
   const StudentModel({
     required this.name,
     required this.course,
     required this.classification,
     required this.lastSession,
+    this.avatarAsset,
   });
 }
 

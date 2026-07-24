@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/dashboard_screen.dart';
-import 'screens/students_screen.dart';
 import 'screens/schedule_screen.dart';
 import 'screens/assess_screen.dart';
 import 'screens/attendance_screen.dart';
+import 'screens/account_screen.dart';
 
 void main() {
   runApp(const RCDAInstructorApp());
@@ -16,8 +16,6 @@ class RCDAInstructorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuilds the whole app whenever ThemeController.isDark changes,
-    // so every screen (which reads AppColors.* directly) re-themes too.
     return ValueListenableBuilder<bool>(
       valueListenable: ThemeController.isDark,
       builder: (context, isDark, _) {
@@ -25,15 +23,13 @@ class RCDAInstructorApp extends StatelessWidget {
           title: 'RCDA Instructor',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.current,
-          home: _AppFlow(),
+          home: const _AppFlow(),
         );
       },
     );
   }
 }
 
-/// Shows the opening/splash section briefly, then fades automatically
-/// into the main tabbed shell — no tap required.
 class _AppFlow extends StatefulWidget {
   const _AppFlow();
 
@@ -58,10 +54,6 @@ class _AppFlowState extends State<_AppFlow> {
   }
 }
 
-/// Root shell holds the current tab index so switching tabs (via bottom
-/// nav OR via "Assess" shortcuts elsewhere in the app) doesn't rebuild
-/// the whole navigation stack — this is a static, single-role app so a
-/// simple index switch is enough.
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
 
@@ -76,18 +68,26 @@ class _RootShellState extends State<RootShell> {
 
   @override
   Widget build(BuildContext context) {
-    switch (_index) {
-      case 1:
-        return StudentsScreen(onTabSelected: _onTabSelected);
-      case 2:
-        return ScheduleScreen(onTabSelected: _onTabSelected);
-      case 3:
-        return AssessScreen(onTabSelected: _onTabSelected);
-      case 4:
-        return AttendanceScreen(onTabSelected: _onTabSelected);
-      case 0:
-      default:
-        return DashboardScreen(onTabSelected: _onTabSelected);
-    }
+    // Listening here means any screen currently on-screen rebuilds the
+    // instant ThemeController.isDark changes — no need to switch tabs
+    // for the new colors to take effect.
+    return ValueListenableBuilder<bool>(
+      valueListenable: ThemeController.isDark,
+      builder: (context, isDark, _) {
+        switch (_index) {
+          case 1:
+            return ScheduleScreen(onTabSelected: _onTabSelected);
+          case 2:
+            return AssessScreen(onTabSelected: _onTabSelected);
+          case 3:
+            return AttendanceScreen(onTabSelected: _onTabSelected);
+          case 4:
+            return AccountScreen(onTabSelected: _onTabSelected);
+          case 0:
+          default:
+            return DashboardScreen(onTabSelected: _onTabSelected);
+        }
+      },
+    );
   }
 }

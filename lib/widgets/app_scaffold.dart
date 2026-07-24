@@ -44,8 +44,6 @@ class AppScaffold extends StatefulWidget {
 class _AppScaffoldState extends State<AppScaffold> {
   bool _headerVisible = true;
 
-  double get _headerHeight => widget.subtitle != null ? 84 : 66;
-
   bool _handleScroll(ScrollNotification notification) {
     final offset = notification.metrics.pixels;
 
@@ -78,35 +76,32 @@ class _AppScaffoldState extends State<AppScaffold> {
         bottom: false,
         child: Column(
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOut,
-              height: _headerVisible ? _headerHeight : 0,
-              child: ClipRect(
-                child: OverflowBox(
-                  minHeight: 0,
-                  maxHeight: _headerHeight,
-                  alignment: Alignment.topCenter,
-                  child: AnimatedOpacity(
-                    opacity: widget.headerOpacity * (_headerVisible ? 1 : 0),
-                    duration: const Duration(milliseconds: 120),
-                    curve: Curves.easeOut,
-                    child: ModernHeader(
-                      title: widget.title,
-                      subtitle: widget.subtitle,
-                      leading: widget.leading,
-                      trailing: widget.actions != null
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: widget.actions!)
-                          : ProfileAvatar(
-                              name: MockData.instructorName,
-                              imageAsset: MockData.instructorAvatarAsset,
-                              radius: 19,
-                              ring: true,
-                            ),
-                    ),
-                  ),
+            ClipRect(
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                child: AnimatedOpacity(
+                  opacity: widget.headerOpacity * (_headerVisible ? 1 : 0),
+                  duration: const Duration(milliseconds: 120),
+                  curve: Curves.easeOut,
+                  child: _headerVisible
+                      ? ModernHeader(
+                          title: widget.title,
+                          subtitle: widget.subtitle,
+                          leading: widget.leading,
+                          trailing: widget.actions != null
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: widget.actions!)
+                              : const ProfileAvatar(
+                                  name: MockData.instructorName,
+                                  imageAsset: MockData.instructorAvatarAsset,
+                                  radius: 19,
+                                  ring: true,
+                                ),
+                        )
+                      : const SizedBox(width: double.infinity),
                 ),
               ),
             ),
@@ -138,42 +133,41 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: NavigationBar(
-            height: 64,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            selectedIndex: currentIndex,
-            onDestinationSelected: (i) => onTabSelected(i),
-            destinations: const [
-              NavigationDestination(
-                  icon: Icon(Icons.grid_view_rounded), label: 'Dashboard'),
-              NavigationDestination(
-                  icon: Icon(Icons.calendar_month_rounded), label: 'Schedule'),
-              NavigationDestination(
-                  icon: Icon(Icons.star_rounded), label: 'Assess'),
-              NavigationDestination(
-                  icon: Icon(Icons.checklist_rounded), label: 'Attendance'),
-              NavigationDestination(
-                  icon: Icon(Icons.person_rounded), label: 'Account'),
-            ],
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(16, 0, 16, 12 + bottomInset),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: NavigationBar(
+          height: 64,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedIndex: currentIndex,
+          onDestinationSelected: (i) => onTabSelected(i),
+          destinations: const [
+            NavigationDestination(
+                icon: Icon(Icons.grid_view_rounded), label: 'Dashboard'),
+            NavigationDestination(
+                icon: Icon(Icons.calendar_month_rounded), label: 'Schedule'),
+            NavigationDestination(
+                icon: Icon(Icons.star_rounded), label: 'Assess'),
+            NavigationDestination(
+                icon: Icon(Icons.checklist_rounded), label: 'Attendance'),
+            NavigationDestination(
+                icon: Icon(Icons.person_rounded), label: 'Account'),
+          ],
         ),
       ),
     );

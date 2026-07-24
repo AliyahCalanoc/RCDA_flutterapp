@@ -21,6 +21,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Only students enrolled in the selected session's course should
+    // show up here — e.g. selecting a "PDC 4 Wheels" session should not
+    // list TDC students.
+    final sessionStudents = _selectedSession == null
+        ? <StudentModel>[]
+        : MockData.students
+            .where((s) => s.course == _selectedSession!.course)
+            .toList();
+
     return AppScaffold(
       title: 'Attendance',
       currentIndex: 3,
@@ -92,8 +101,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   ),
                 ),
               )
+            else if (sessionStudents.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: Text(
+                    'No students enrolled in this session.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+              )
             else ...[
-              ...MockData.students.map((s) {
+              ...sessionStudents.map((s) {
                 final current = _attendance[s.name] ?? 'Present';
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),

@@ -84,7 +84,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                         style: TextStyle(
                             fontWeight: FontWeight.w800, fontSize: 17)),
                     const SizedBox(height: 16),
-                    _FieldLabel('Full name'),
+                    const _FieldLabel('Full name'),
                     TextFormField(
                       controller: nameCtrl,
                       decoration:
@@ -93,7 +93,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                           (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                     const SizedBox(height: 12),
-                    _FieldLabel('Course / Program'),
+                    const _FieldLabel('Course / Program'),
                     TextFormField(
                       controller: courseCtrl,
                       decoration: const InputDecoration(
@@ -109,7 +109,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _FieldLabel('Age'),
+                              const _FieldLabel('Age'),
                               TextFormField(
                                 controller: ageCtrl,
                                 keyboardType: TextInputType.number,
@@ -124,7 +124,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _FieldLabel('Gender'),
+                              const _FieldLabel('Gender'),
                               DropdownButtonFormField<String>(
                                 initialValue: gender,
                                 decoration: const InputDecoration(),
@@ -141,7 +141,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _FieldLabel('Email'),
+                    const _FieldLabel('Email'),
                     TextFormField(
                       controller: emailCtrl,
                       keyboardType: TextInputType.emailAddress,
@@ -149,7 +149,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                           const InputDecoration(hintText: 'name@example.com'),
                     ),
                     const SizedBox(height: 12),
-                    _FieldLabel('Phone'),
+                    const _FieldLabel('Phone'),
                     TextFormField(
                       controller: phoneCtrl,
                       keyboardType: TextInputType.phone,
@@ -157,7 +157,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                           const InputDecoration(hintText: '+1 202-555-0100'),
                     ),
                     const SizedBox(height: 12),
-                    _FieldLabel('Address'),
+                    const _FieldLabel('Address'),
                     TextFormField(
                       controller: addressCtrl,
                       decoration:

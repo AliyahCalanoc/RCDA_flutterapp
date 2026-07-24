@@ -49,7 +49,7 @@ class _AppFlowState extends State<_AppFlow> {
               key: const ValueKey('splash'),
               onFinished: () => setState(() => _showSplash = false),
             )
-          : RootShell(key: const ValueKey('root')),
+          : const RootShell(key: ValueKey('root')),
     );
   }
 }

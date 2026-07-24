@@ -1,7 +1,7 @@
 import '../models/models.dart';
 
 /// Static mock data — mirrors the RC Driving Academy web instructor
-/// dashboard (Mario Santos, 7 assigned students, PDC/TDC sessions).
+/// dashboard (Joel Barish, 6 assigned students, PDC/TDC sessions).
 class MockData {
   static const instructorName = 'Joel Barish';
   static const instructorRole = 'Instructor · RCDA';
@@ -12,12 +12,12 @@ class MockData {
       'assets/images/instructor/Joel_Barish.jpg';
 
   static const sessionsToday = 0;
-  static const upcomingSessions = 3;
+  static const upcomingSessions = 4;
 
   static const List<StudentModel> students = [
     StudentModel(
         name: 'Clementine Kruczynski',
-        course: 'TDC Face to Face',
+        course: 'TDC Online',
         classification: '—',
         lastSession: 'Aug 3, 2026',
         avatarAsset: 'assets/images/students/Clementine_Kruczynski.jpg',
@@ -40,7 +40,7 @@ class MockData {
     StudentModel(
         name: 'Todd Anderson',
         course: 'PDC 4 Wheels',
-        classification: 'average',
+        classification: '—',
         lastSession: 'Jul 20, 2026',
         avatarAsset: 'assets/images/students/Todd_Anderson.jpg',
         age: 19,
@@ -51,7 +51,7 @@ class MockData {
     StudentModel(
         name: 'Steven Meeks',
         course: 'PDC 4 Wheels',
-        classification: 'good',
+        classification: '—',
         lastSession: 'Jul 20, 2026',
         avatarAsset: 'assets/images/students/Steven_Meeks.jpg',
         age: 20,
@@ -72,7 +72,7 @@ class MockData {
         gender: 'Male'),
     StudentModel(
         name: 'Kat Stratford',
-        course: 'TDC Face to Face',
+        course: 'PDC 2 Wheels',
         classification: '—',
         lastSession: 'Jul 22, 2026',
         avatarAsset: 'assets/images/students/Kat_Stratford.jpg',
@@ -97,8 +97,14 @@ class MockData {
         venue: 'RC Driving Academy — Driving Range',
         status: 'Open'),
     ScheduleItem(
+        date: 'Jul 31, 2026',
+        course: 'PDC 2 Wheels',
+        time: '2:00 PM – 4:00 PM',
+        venue: 'RC Driving Academy — Driving Range',
+        status: 'Open'),
+    ScheduleItem(
         date: 'Aug 3, 2026',
-        course: 'TDC Face to Face',
+        course: 'TDC Online',
         time: '1:00 PM – 3:00 PM',
         venue: 'RC Driving Academy — Main Branch',
         status: 'Open'),
@@ -110,12 +116,12 @@ class MockData {
   static List<String> get studentNames => students.map((s) => s.name).toList();
 
   static List<SkillRating> defaultSkills() => [
-        SkillRating(name: 'Steering Control', stars: 5),
-        SkillRating(name: 'Speed Management', stars: 4),
-        SkillRating(name: 'Lane Discipline', stars: 5),
-        SkillRating(name: 'Parking', stars: 4),
-        SkillRating(name: 'Safety Awareness', stars: 5),
-        SkillRating(name: 'Mirror & Observation', stars: 4),
+        SkillRating(name: 'Steering Control', stars: 0),
+        SkillRating(name: 'Speed Management', stars: 0),
+        SkillRating(name: 'Lane Discipline', stars: 0),
+        SkillRating(name: 'Parking', stars: 0),
+        SkillRating(name: 'Safety Awareness', stars: 0),
+        SkillRating(name: 'Mirror & Observation', stars: 0),
       ];
 
   // Mutable in-memory list so "Save Assessment" can append to it for the demo.

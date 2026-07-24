@@ -25,7 +25,7 @@ class AccountScreen extends StatelessWidget {
               padding: const EdgeInsets.all(18),
               child: Row(
                 children: [
-                  ProfileAvatar(
+                  const ProfileAvatar(
                     name: MockData.instructorName,
                     imageAsset: MockData.instructorAvatarAsset,
                     radius: 30,
@@ -35,9 +35,9 @@ class AccountScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           MockData.instructorName,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.w800, fontSize: 17),
                         ),
                         const SizedBox(height: 2),
@@ -68,7 +68,7 @@ class AccountScreen extends StatelessWidget {
               subtitle: Text(isDark ? 'Dark mode' : 'Light mode'),
               trailing: Switch(
                 value: isDark,
-                activeColor: AppColors.primaryRed,
+                activeThumbColor: AppColors.primaryRed,
                 onChanged: (_) => ThemeController.toggle(),
               ),
             ),

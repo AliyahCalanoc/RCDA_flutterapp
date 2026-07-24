@@ -7,27 +7,65 @@ import '../widgets/common_widgets.dart';
 
 class AssessScreen extends StatefulWidget {
   final TabSelected onTabSelected;
-
-  /// Student to pre-select when this screen opens (e.g. tapped from a
-  /// student's "Assess" button elsewhere in the app). Falls back to the
-  /// first student in the list if null or not a recognized name.
   final String? initialStudent;
 
-  const AssessScreen(
-      {super.key, required this.onTabSelected, this.initialStudent});
+  const AssessScreen({
+    super.key,
+    required this.onTabSelected,
+    this.initialStudent,
+  });
 
   @override
   State<AssessScreen> createState() => _AssessScreenState();
 }
 
 class _AssessScreenState extends State<AssessScreen> {
-  late String _session = MockData.sessionOptions.first;
-  late String _student = (widget.initialStudent != null &&
-          MockData.studentNames.contains(widget.initialStudent))
-      ? widget.initialStudent!
-      : MockData.studentNames.first;
+  late ScheduleItem _session;
+  late List<StudentModel> _studentsForSession;
+  StudentModel? _student;
   late final List<SkillRating> _skills = MockData.defaultSkills();
   final _feedbackController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initSelection();
+  }
+
+  void _initSelection() {
+    StudentModel? preselected;
+    if (widget.initialStudent != null) {
+      final matches =
+          MockData.students.where((s) => s.name == widget.initialStudent);
+      if (matches.isNotEmpty) preselected = matches.first;
+    }
+
+    if (preselected != null) {
+      final sessionMatches =
+          MockData.schedule.where((s) => s.course == preselected!.course);
+      _session = sessionMatches.isNotEmpty
+          ? sessionMatches.first
+          : MockData.schedule.first;
+    } else {
+      _session = MockData.schedule.first;
+    }
+
+    _studentsForSession = _studentsFor(_session);
+    _student = preselected ??
+        (_studentsForSession.isNotEmpty ? _studentsForSession.first : null);
+  }
+
+  List<StudentModel> _studentsFor(ScheduleItem session) =>
+      MockData.students.where((s) => s.course == session.course).toList();
+
+  void _onSessionChanged(ScheduleItem session) {
+    final matches = _studentsFor(session);
+    setState(() {
+      _session = session;
+      _studentsForSession = matches;
+      _student = matches.isNotEmpty ? matches.first : null;
+    });
+  }
 
   @override
   void dispose() {
@@ -36,16 +74,16 @@ class _AssessScreenState extends State<AssessScreen> {
   }
 
   void _saveAssessment() {
+    if (_student == null) return;
     final avg =
         _skills.map((s) => s.stars).reduce((a, b) => a + b) / _skills.length;
-    final percent = (avg / 5.0) * 100;
     setState(() {
       MockData.recentAssessments.insert(
         0,
         AssessmentRecord(
-          student: _student,
+          student: _student!.name,
           date: 'Jul 23, 2026',
-          score: '${percent.toStringAsFixed(0)}%',
+          score: '${((avg / 5) * 100).round()}%',
           level: avg >= 4.3
               ? 'fast'
               : (avg >= 3 ? 'average' : 'needs improvement'),
@@ -55,6 +93,41 @@ class _AssessScreenState extends State<AssessScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Assessment saved (static demo)')),
     );
+  }
+
+  Future<void> _pickSession() async {
+    final picked = await showModalBottomSheet<ScheduleItem>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _PickerSheet<ScheduleItem>(
+        title: 'Select Session',
+        items: MockData.schedule,
+        selected: _session,
+        labelBuilder: (s) => '${s.course} · ${s.date}',
+      ),
+    );
+    if (picked != null) _onSessionChanged(picked);
+  }
+
+  Future<void> _pickStudent() async {
+    if (_studentsForSession.isEmpty) return;
+    final picked = await showModalBottomSheet<StudentModel>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _PickerSheet<StudentModel>(
+        title: 'Select Student',
+        items: _studentsForSession,
+        selected: _student,
+        labelBuilder: (s) => s.name,
+      ),
+    );
+    if (picked != null) setState(() => _student = picked);
   }
 
   @override
@@ -72,32 +145,38 @@ class _AssessScreenState extends State<AssessScreen> {
           ),
           const SizedBox(height: 16),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _Dropdown(
+                child: _PickerField(
                   label: 'Session',
-                  value: _session,
-                  items: MockData.sessionOptions,
-                  onChanged: (v) => setState(() => _session = v!),
+                  value: '${_session.course} · ${_session.date}',
+                  onTap: _pickSession,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _Dropdown(
+                child: _PickerField(
                   label: 'Student',
-                  value: _student,
-                  items: MockData.studentNames,
-                  onChanged: (v) => setState(() => _student = v!),
+                  value: _student?.name ?? 'No students',
+                  onTap: _pickStudent,
+                  enabled: _studentsForSession.isNotEmpty,
                 ),
               ),
             ],
           ),
+          if (_studentsForSession.isEmpty) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'No students enrolled in this session.',
+              style: TextStyle(color: AppColors.danger, fontSize: 12.5),
+            ),
+          ],
           const SizedBox(height: 20),
           const SectionHeader(title: 'Skills Rating'),
           ..._skills.map((skill) => _SkillRow(
                 skill: skill,
                 onStarsChanged: (v) => setState(() => skill.stars = v),
-                onNoteChanged: (v) => setState(() => skill.note = v),
               )),
           const SizedBox(height: 16),
           const Text('Qualitative Feedback',
@@ -113,7 +192,7 @@ class _AssessScreenState extends State<AssessScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _saveAssessment,
+              onPressed: _student == null ? null : _saveAssessment,
               child: const Text('Save Assessment'),
             ),
           ),
@@ -160,15 +239,148 @@ class _AssessScreenState extends State<AssessScreen> {
   }
 }
 
+/// A tappable field styled like the old dropdown, but opens a bottom
+/// sheet instead of a DropdownButton overlay — avoids the overlay
+/// mispositioning that DropdownButton has when embedded in scroll views.
+class _PickerField extends StatelessWidget {
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+  final bool enabled;
+
+  const _PickerField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        const SizedBox(height: 6),
+        Material(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: enabled ? onTap : null,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: enabled
+                            ? AppColors.textPrimary
+                            : AppColors.textMuted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.expand_more_rounded,
+                      color: AppColors.textSecondary, size: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Generic bottom-sheet list picker shared by both fields above.
+class _PickerSheet<T> extends StatelessWidget {
+  final String title;
+  final List<T> items;
+  final T? selected;
+  final String Function(T) labelBuilder;
+
+  const _PickerSheet({
+    required this.title,
+    required this.items,
+    required this.selected,
+    required this.labelBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(title,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w800)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: items.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, indent: 20, endIndent: 20),
+                itemBuilder: (context, i) {
+                  final item = items[i];
+                  final isSelected = item == selected;
+                  return ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    title: Text(
+                      labelBuilder(item),
+                      style: TextStyle(
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primaryRed
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(Icons.check_rounded,
+                            color: AppColors.primaryRed)
+                        : null,
+                    onTap: () => Navigator.of(context).pop(item),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SkillRow extends StatelessWidget {
   final SkillRating skill;
   final void Function(double) onStarsChanged;
-  final void Function(String) onNoteChanged;
 
-  const _SkillRow(
-      {required this.skill,
-      required this.onStarsChanged,
-      required this.onNoteChanged});
+  const _SkillRow({required this.skill, required this.onStarsChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -198,143 +410,8 @@ class _SkillRow extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            children: ['Perfect', 'Average', 'Low'].map((note) {
-              final selected = skill.note == note;
-              return ChoiceChip(
-                label: Text(note),
-                selected: selected,
-                onSelected: (_) => onNoteChanged(note),
-                selectedColor: AppColors.primaryRed.withValues(alpha: 0.24),
-                backgroundColor: AppColors.surfaceElevated,
-                labelStyle: TextStyle(
-                    color: selected
-                        ? AppColors.primaryRed
-                        : AppColors.textSecondary,
-                    fontWeight: FontWeight.w600),
-                side: BorderSide(
-                    color: selected ? AppColors.primaryRed : AppColors.border),
-              );
-            }).toList(),
-          ),
         ],
       ),
-    );
-  }
-}
-
-class _Dropdown extends StatelessWidget {
-  final String label;
-  final String value;
-  final List<String> items;
-  final void Function(String?) onChanged;
-
-  const _Dropdown(
-      {required this.label,
-      required this.value,
-      required this.items,
-      required this.onChanged});
-
-  void _openPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                Text('Select $label',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 17)),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, i) {
-                      final item = items[i];
-                      final selected = item == value;
-                      return ListTile(
-                        title: Text(item,
-                            style: TextStyle(
-                                fontWeight: selected
-                                    ? FontWeight.w800
-                                    : FontWeight.w500,
-                                color: selected
-                                    ? AppColors.primaryRed
-                                    : AppColors.textPrimary)),
-                        trailing: selected
-                            ? const Icon(Icons.check_rounded,
-                                color: AppColors.primaryRed)
-                            : null,
-                        onTap: () {
-                          Navigator.of(ctx).pop();
-                          onChanged(item);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-        const SizedBox(height: 6),
-        InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => _openPicker(context),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceElevated,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(value,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
-                ),
-                Icon(Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.textMuted),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

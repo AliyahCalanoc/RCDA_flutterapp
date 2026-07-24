@@ -13,8 +13,8 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: "Here's what's on your plate today",
-      subtitle: 'Welcome back, ${MockData.instructorName.split(' ').first}',
+      title: "Let's see what's on today",
+      subtitle: 'Welcome back, ${MockData.instructorName.split(' ').first}!',
       currentIndex: 0,
       onTabSelected: onTabSelected,
       body: ListView(

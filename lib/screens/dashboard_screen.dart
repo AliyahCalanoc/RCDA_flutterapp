@@ -6,7 +6,7 @@ import '../widgets/common_widgets.dart';
 import 'students_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
-  final void Function(int) onTabSelected;
+  final TabSelected onTabSelected;
 
   const DashboardScreen({super.key, required this.onTabSelected});
 
@@ -64,9 +64,9 @@ class DashboardScreen extends StatelessWidget {
           ),
           Card(
             child: Column(
-              children: List.generate(MockData.students.length, (i) {
+              children: List.generate(MockData.students.take(4).length, (i) {
                 final s = MockData.students[i];
-                final isLast = i == MockData.students.length - 1;
+                final isLast = i == MockData.students.take(4).length - 1;
                 return Column(
                   children: [
                     ListTile(
@@ -77,14 +77,6 @@ class DashboardScreen extends StatelessWidget {
                       title: Text(s.name,
                           style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text('${s.course} · Last: ${s.lastSession}'),
-                      trailing: OutlinedButton(
-                        onPressed: () => onTabSelected(2),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryRed,
-                          side: const BorderSide(color: AppColors.primaryRed),
-                        ),
-                        child: const Text('Assess'),
-                      ),
                     ),
                     if (!isLast)
                       const Divider(height: 1, indent: 16, endIndent: 16),

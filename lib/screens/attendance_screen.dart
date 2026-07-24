@@ -6,7 +6,7 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/common_widgets.dart';
 
 class AttendanceScreen extends StatefulWidget {
-  final void Function(int) onTabSelected;
+  final TabSelected onTabSelected;
 
   const AttendanceScreen({super.key, required this.onTabSelected});
 
@@ -41,7 +41,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: GestureDetector(
-                  onTap: () => setState(() => _selectedSession = s),
+                  onTap: () =>
+                      setState(() => _selectedSession = selected ? null : s),
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(

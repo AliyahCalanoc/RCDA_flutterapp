@@ -64,7 +64,18 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int _index = 0;
 
-  void _onTabSelected(int i) => setState(() => _index = i);
+  // Which student the Assess tab should default to. Set whenever a
+  // student's "Assess" button is tapped directly (dashboard or My
+  // Students); left as-is for plain bottom-nav taps so the Assess tab
+  // just keeps showing whoever was selected last.
+  String? _assessStudent;
+
+  void _onTabSelected(int i, {String? studentName}) {
+    setState(() {
+      _index = i;
+      if (studentName != null) _assessStudent = studentName;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +89,11 @@ class _RootShellState extends State<RootShell> {
           case 1:
             return ScheduleScreen(onTabSelected: _onTabSelected);
           case 2:
-            return AssessScreen(onTabSelected: _onTabSelected);
+            return AssessScreen(
+              key: ValueKey('assess-$_assessStudent'),
+              onTabSelected: _onTabSelected,
+              initialStudent: _assessStudent,
+            );
           case 3:
             return AttendanceScreen(onTabSelected: _onTabSelected);
           case 4:

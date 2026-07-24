@@ -5,7 +5,7 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/common_widgets.dart';
 
 class ScheduleScreen extends StatelessWidget {
-  final void Function(int) onTabSelected;
+  final TabSelected onTabSelected;
 
   const ScheduleScreen({super.key, required this.onTabSelected});
 

@@ -6,9 +6,15 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/common_widgets.dart';
 
 class AssessScreen extends StatefulWidget {
-  final void Function(int) onTabSelected;
+  final TabSelected onTabSelected;
 
-  const AssessScreen({super.key, required this.onTabSelected});
+  /// Student to pre-select when this screen opens (e.g. tapped from a
+  /// student's "Assess" button elsewhere in the app). Falls back to the
+  /// first student in the list if null or not a recognized name.
+  final String? initialStudent;
+
+  const AssessScreen(
+      {super.key, required this.onTabSelected, this.initialStudent});
 
   @override
   State<AssessScreen> createState() => _AssessScreenState();
@@ -16,7 +22,10 @@ class AssessScreen extends StatefulWidget {
 
 class _AssessScreenState extends State<AssessScreen> {
   late String _session = MockData.sessionOptions.first;
-  late String _student = MockData.studentNames.first;
+  late String _student = (widget.initialStudent != null &&
+          MockData.studentNames.contains(widget.initialStudent))
+      ? widget.initialStudent!
+      : MockData.studentNames.first;
   late final List<SkillRating> _skills = MockData.defaultSkills();
   final _feedbackController = TextEditingController();
 
@@ -29,13 +38,14 @@ class _AssessScreenState extends State<AssessScreen> {
   void _saveAssessment() {
     final avg =
         _skills.map((s) => s.stars).reduce((a, b) => a + b) / _skills.length;
+    final percent = (avg / 5.0) * 100;
     setState(() {
       MockData.recentAssessments.insert(
         0,
         AssessmentRecord(
           student: _student,
           date: 'Jul 23, 2026',
-          score: '${avg.toStringAsFixed(1)} / 5.0',
+          score: '${percent.toStringAsFixed(0)}%',
           level: avg >= 4.3
               ? 'fast'
               : (avg >= 3 ? 'average' : 'needs improvement'),
@@ -104,7 +114,7 @@ class _AssessScreenState extends State<AssessScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _saveAssessment,
-              child: const Text('Save Assessment  →'),
+              child: const Text('Save Assessment'),
             ),
           ),
           const SizedBox(height: 24),
@@ -227,6 +237,73 @@ class _Dropdown extends StatelessWidget {
       required this.items,
       required this.onChanged});
 
+  void _openPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                Text('Select $label',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 17)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, i) {
+                      final item = items[i];
+                      final selected = item == value;
+                      return ListTile(
+                        title: Text(item,
+                            style: TextStyle(
+                                fontWeight: selected
+                                    ? FontWeight.w800
+                                    : FontWeight.w500,
+                                color: selected
+                                    ? AppColors.primaryRed
+                                    : AppColors.textPrimary)),
+                        trailing: selected
+                            ? const Icon(Icons.check_rounded,
+                                color: AppColors.primaryRed)
+                            : null,
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          onChanged(item);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -235,23 +312,25 @@ class _Dropdown extends StatelessWidget {
         Text(label,
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
         const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              isExpanded: true,
-              dropdownColor: AppColors.surfaceElevated,
-              items: items
-                  .map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(e, overflow: TextOverflow.ellipsis)))
-                  .toList(),
-              onChanged: onChanged,
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => _openPicker(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(value,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                ),
+                Icon(Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.textMuted),
+              ],
             ),
           ),
         ),

@@ -1,5 +1,123 @@
 import 'package:flutter/material.dart';
+import '../models/models.dart';
 import '../theme/app_theme.dart';
+
+/// Callback used for bottom-nav / "Assess" taps. [studentName] is optional —
+/// plain tab switches (bottom nav) omit it; tapping a specific student's
+/// "Assess" button passes their name so the Assess screen can pre-select
+/// them instead of always defaulting to the first student in the list.
+typedef TabSelected = void Function(int index, {String? studentName});
+
+/// Opens a bottom sheet with a student's profile details (name, age,
+/// email, phone, address, gender). Fields that are missing show '—'.
+void showStudentInfoSheet(BuildContext context, StudentModel student) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: AppColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (ctx) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  ProfileAvatar(
+                      name: student.name,
+                      imageAsset: student.avatarAsset,
+                      radius: 26),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(student.name,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w800, fontSize: 17)),
+                        const SizedBox(height: 2),
+                        Text(student.course,
+                            style: TextStyle(
+                                color: AppColors.textSecondary, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _infoRow(Icons.cake_rounded, 'Age',
+                  student.age != null ? '${student.age}' : '—'),
+              _infoRow(Icons.email_rounded, 'Email', student.email ?? '—'),
+              _infoRow(Icons.phone_rounded, 'Phone', student.phone ?? '—'),
+              _infoRow(
+                  Icons.location_on_rounded, 'Address', student.address ?? '—'),
+              _infoRow(Icons.wc_rounded, 'Gender', student.gender ?? '—'),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _infoRow(IconData icon, String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 19, color: AppColors.primaryRed),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 70,
+          child: Text(label,
+              style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600)),
+        ),
+        Expanded(
+          child: Text(value,
+              style:
+                  const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Small round "info" icon button placed before the Assess button.
+class StudentInfoButton extends StatelessWidget {
+  final StudentModel student;
+
+  const StudentInfoButton({super.key, required this.student});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () => showStudentInfoSheet(context, student),
+      icon: Icon(Icons.info_outline_rounded, color: AppColors.textSecondary),
+      tooltip: 'Student info',
+      splashRadius: 20,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
 
 /// Circular profile photo. Shows a real local asset image when [imageAsset]
 /// is given; falls back to the person's initial on a tinted background if

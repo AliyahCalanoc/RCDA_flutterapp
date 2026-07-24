@@ -9,12 +9,24 @@ class StudentModel {
   final String?
       avatarAsset; // local asset image path — null falls back to initials
 
+  // Extra profile details shown in the "Student Info" panel.
+  final int? age;
+  final String? email;
+  final String? phone;
+  final String? address;
+  final String? gender;
+
   const StudentModel({
     required this.name,
     required this.course,
     required this.classification,
     required this.lastSession,
     this.avatarAsset,
+    this.age,
+    this.email,
+    this.phone,
+    this.address,
+    this.gender,
   });
 }
 

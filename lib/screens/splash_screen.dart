@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
           curve: Curves.easeOut,
           child: Image.asset(
             'assets/images/RCDA_logo.jpg',
-            width: 150,
+            width: 200,
             fit: BoxFit.contain,
           ),
         ),
